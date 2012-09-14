@@ -1,0 +1,33 @@
+$(document).ready(function() {
+	/*if(location.href.indexOf("reader")!=-1) {
+		 $('#fileList tr').each(function(){
+			//little hack to set unescape filenames in attribute
+			$(this).attr('data-file',decodeURIComponent($(this).attr('data-file')));
+		});
+		$('td.filename a').live('click',function(event) {
+			event.preventDefault();
+			var filename=$(this).parent().parent().attr('data-file');
+			var tr=$('tr').filterAttr('data-file',filename);
+			var renaming=tr.data('renaming');
+			if(!renaming && !FileList.isLoading(filename)){
+				var mime=$(this).parent().parent().data('mime');
+				var type=$(this).parent().parent().data('type');
+				var action=FileActions.getDefault(mime,type);
+				if(action){
+					action(filename);
+				}
+			}
+		});
+	}*/
+if(location.href.indexOf("reader")!=-1) {
+$('.name').click(function() {
+
+var filename=$(this).parent().parent().attr('data-file');
+var dir = '';
+showPDFviewer(dir,filename);
+
+});
+
+}
+});
+
