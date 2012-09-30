@@ -1,6 +1,6 @@
 $(document).ready(function() {
 	$('#fileList tr').each(function(){
-		// data-file attribute to contain unescaped filenames.
+		// data-file attribute must contain unescaped filenames.
 		$(this).attr('data-file',decodeURIComponent($(this).attr('data-file')));
 	});
 	
