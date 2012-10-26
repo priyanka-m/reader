@@ -1,0 +1,151 @@
+$(document).ready(function() {
+	$('#fileList tr').each(function(){
+		// data-file attribute to contain unescaped filenames.
+		$(this).attr('data-file',decodeURIComponent($(this).attr('data-file')));
+	});
+	
+	$('#file_action_panel').attr('activeAction', false);
+	
+	// See if url conatins the index 'reader'
+	if(location.href.indexOf("reader")!=-1) {
+		'use strict';
+		//
+		// Fetch the PDF document from the URL using promices
+		//
+		PDFJS.disableWorker = true;
+	$('td.filename a').each(function() {
+			var url = $(this).attr('href');
+			if (url.indexOf('pdf') != -1) {
+				PDFJS.getDocument(url).then(function(pdf) {
+				// Using promise to fetch the page
+					pdf.getPage(1).then(function(page) {
+					var scale = 0.2;
+					var pageRatio = 0.2;
+					var viewport = page.getViewport(scale);
+					//
+					// Prepare canvas using PDF page dimensions
+					//
+			
+					var div = document.createElement('div');
+					div.id = 'thumbnailContainer';
+					div.className = 'thumbnail';
+					var anchor = document.getElementById(url);
+			
+					var canvas = document.createElement("canvas");
+					canvas.id = 'thumbnail';
+			
+					canvas.height = viewport.height;
+					canvas.width = viewport.width;
+					div.style.height = canvas.height + 'px';
+					div.style.width = canvas.width + 'px';
+					div.appendChild(canvas);
+					anchor.appendChild(div);
+					
+					var ctx = canvas.getContext('2d');
+					ctx.save();
+					ctx.fillStyle = 'rgb(255, 255, 255)';
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					ctx.restore();
+    
+					var view = page.view;
+					var scaleX = (canvas.width / page.width);
+					var scaleY = (canvas.height / page.height);
+					ctx.translate(-view.x * scaleX, -view.y * scaleY);
+
+    
+					//
+					// Render PDF page into canvas context
+					//
+					var renderContext = {
+						canvasContext: ctx,
+						viewport: viewport
+					};
+					page.render(renderContext);
+				});
+			});
+			
+		}
+	});
+
+		// Perform function on every click of a link, now and in future.
+		$('td.filename a').live('click',function(event) {
+			event.preventDefault();
+			var filename=$(this).parent().parent().attr('data-file');
+			var tr=$('tr').filterAttr('data-file',filename);
+			var mime=$(this).parent().parent().data('mime');
+			var type=$(this).parent().parent().data('type');
+			// Check if clicked link is a pdf file or a directory, perform suitable function.
+			var action=getAction(mime,type);
+			if(action){
+				action(filename);
+			}
+		});	
+		
+		$('a.dirs input').each(function() {
+			var div_id = $(this).attr('value');
+			var url = $(this).attr('id');
+			
+			PDFJS.getDocument(url).then(function(pdf) {
+				// Using promise to fetch the page
+					pdf.getPage(1).then(function(page) {
+					var scale = 0.2;
+					var pageRatio = 0.2;
+					var viewport = page.getViewport(scale);
+					//
+					// Prepare canvas using PDF page dimensions
+					//
+					var anchor = document.getElementById(div_id);
+			
+					var canvas = document.createElement("canvas");
+					canvas.id = "dirsCanvas";
+					
+					canvas.height = viewport.height;
+					canvas.width = viewport.width;
+					anchor.appendChild(canvas);
+
+					var ctx = canvas.getContext('2d');
+					ctx.save();
+					ctx.fillStyle = 'rgb(255, 255, 255)';
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					ctx.restore();
+    
+					var view = page.view;
+					var scaleX = (canvas.width / page.width);
+					var scaleY = (canvas.height / page.height);
+					ctx.translate(-view.x * scaleX, -view.y * scaleY);
+
+    
+					//
+					// Render PDF page into canvas context
+					//
+					var renderContext = {
+						canvasContext: ctx,
+						viewport: viewport
+					};
+					page.render(renderContext);
+				});
+			});
+			
+		});	
+	}
+});
+
+/* Function that returns suitable function definition to be executed on 
+ * click of the file whose mime and type are passed. */
+function getAction(mime,type) {
+	var name;
+	if(mime == 'application/pdf') {
+		name = function (filename){
+			showPDFviewer($('#dir').val(),filename);
+		}
+	}
+	else {
+		name = function (filename){
+			window.location=OC.linkTo('reader', 'index.php') + '&dir='+
+			encodeURIComponent($('#dir').val()).replace(/%2F/g, '/')+'/'+
+			encodeURIComponent(filename) + '/';
+		}
+	}
+	return name;
+}
+
