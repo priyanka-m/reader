@@ -1,8 +1,14 @@
 <?php
 	
+<<<<<<< HEAD
 	function check_thumb_exists($location) {
 		$image_path = rtrim($location,'pdf').'png';
 		if(!file_exists('/opt/lampp/htdocs/owncloud/data/priyanka/reader'.$image_path)) {
+=======
+	function check_thumb_exists($location,$filename) {
+		$image_path = rtrim($location,'.pdf').'.png';
+		if(!file_exists('/opt/lampp/htdocs/owncloud/data/priyanka/reader/'.$image_path)) {
+>>>>>>> e6b5cb58f3a4bf748f85c9a6fcd258e7f6507ddf
 			$check = "false";
 		}
 		else
